@@ -1,0 +1,83 @@
+import java.io.*;
+import java.net.*;
+
+public class Main {    
+
+	public String toString() {
+		return "ProxyServer []";
+	}
+
+	public static void main(String[] args) {
+        try {
+            int port = 8080; // Port for the proxy server
+
+            ServerSocket serverSocket = new ServerSocket(port);
+
+            System.out.println("Proxy Server listening on port " + port);
+
+            while (true) {
+                Socket clientSocket = serverSocket.accept();
+
+                Thread thread = new Thread(new RequestHandler(clientSocket));
+                thread.start();
+            }
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+    }
+}
+
+class RequestHandler implements Runnable {
+    private Socket clientSocket;
+
+    public RequestHandler(Socket clientSocket) {
+        this.clientSocket = clientSocket;
+    }
+
+    @Override
+    public void run() {
+        try {
+            BufferedReader clientIn = new BufferedReader(new InputStreamReader(clientSocket.getInputStream()));
+            PrintWriter clientOut = new PrintWriter(clientSocket.getOutputStream());
+
+            String inputLine;
+            StringBuilder request = new StringBuilder();
+
+            while ((inputLine = clientIn.readLine()) != null) {
+                request.append(inputLine).append("\r\n");
+
+                if (inputLine.isEmpty()) {
+                    break;
+                }
+            }
+
+            // Modify the request if necessary (e.g., change the target server)
+            String modifiedRequest = request.toString();
+
+            // Create a connection to the target server
+            Socket serverSocket = new Socket("www.google.com", 80); /* Add any server name or IP address here */
+
+            PrintWriter serverOut = new PrintWriter(serverSocket.getOutputStream());
+            BufferedReader serverIn = new BufferedReader(new InputStreamReader(serverSocket.getInputStream()));
+
+            serverOut.print(modifiedRequest);
+            serverOut.flush();
+
+            StringBuilder response = new StringBuilder();
+
+            while ((inputLine = serverIn.readLine()) != null) {
+                response.append(inputLine).append("\r\n");
+            }
+
+            // Modify the response if necessary
+
+            clientOut.print(response.toString());
+            clientOut.flush();
+
+            clientSocket.close();
+            serverSocket.close();
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+    }
+}
