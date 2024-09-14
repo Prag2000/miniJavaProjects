@@ -1,0 +1,17 @@
+import java.util.Scanner;
+
+public class Main {
+    public static void main(String[] args) {
+        Scanner scanner = new Scanner(System.in);
+        double x, y, z;
+        System.out.print("Enter x: ");
+        x = scanner.nextDouble();
+        System.out.print("Enter y: ");
+        y = scanner.nextDouble();
+        System.out.print("Enter z: ");
+        z = scanner.nextDouble();
+        double xyz = Math.pow(x, z) + Math.pow(y, z);
+        System.out.println("Result: " + xyz);
+    }
+}
+
